@@ -1,0 +1,153 @@
+
+
+
+     CHDB(7)                                                   CHDB(7)
+
+
+
+
+
+     NAME
+          chdb - chess database browser
+
+     SYNOPSIS
+          chdb [ file ... ]
+
+     DESCRIPTION
+          Chdb reads the given files of chess games (hist by default)
+          and accepts commands to search, play through, and display
+          the games in these files.  If x is the name of the file, it
+          is looked for under the names x, x.m.out, and
+          /lib/chess/x.m.out.
+
+          After reading the files, chdb displays a chess board, a text
+          window with a command line, and vertical and horizontal
+          scroll bars along the edges of the board.  The text window
+          holds 6 lines of information about the game and position
+          and, at the bottom, a command line in which to type.  The
+          displayed text contains chess symbols-use a suitable font.
+
+          The vertical scroll bar scans through the games to select a
+          game; the horizontal bar then scans through the moves of the
+          selected game.  Both scroll bars use button 1 to scan back-
+          wards, button 3 to scan forwards, and button 2 to jump to an
+          absolute position.  With buttons 1 and 3, the scroll bars
+          are calibrated in units of 1 through 8 corresponding to the
+          ranks and files of the board.  The units measure games on
+          the vertical scroll bar, ply (half-moves) on the horizontal
+          scroll bar.  For example, clicking button 3 on the horizon-
+          tal scroll bar under the d file steps through the game two
+          full moves.
+
+          Moves may be made on the chess board by pointing with button
+          1.  There are two methods to point at moves.  For the first
+          method, point at the piece to be moved, press button 1,
+          point to the place to move that piece, and release button 1.
+          In the second method, point at the place where a piece is to
+          move and press button 1.  The smallest/least-central piece
+          that can move there is highlighted.  Releasing button 1
+          without moving the mouse will make the highlighted move.
+          Moving the mouse to the desired piece and releasing the but-
+          ton will move the selected piece.
+
+          Typed lines of text are echoed in the command line and exe-
+          cuted.  The available commands are:
+
+          f n n
+               Set the format for display of moves in the text window.
+               The first number is the verbosity, with 0 minimal.  The
+               second number is 0 for algebraic, 1 for English, and 2
+               for figurine (default).
+
+          g n  Go to the game with ordinal number n in the input
+               files.  If n is prefixed with a + or -, it is inter-
+               preted as a relative position in the current set of
+               games (see below).  N defaults to +1.
+
+          p n  Go to whole move n in the current game.  If n is pre-
+               fixed with a + or -, it is interpreted as an offset in
+               ply from the current position.  N defaults to +1.
+
+          k n  Mark the current set of games with tag n (see patterns,
+               below).
+
+          w type file
+               Write the current set of games to file. Type is either
+               a (write the games as text) or m (write the games in
+               binary format suitable for chdb).
+
+          Patterns select subsets of the games.  A pattern is one of
+          the following, in decreasing precedence order.  Parentheses
+          can be used for grouping.
+
+          .    The current game.
+
+          *    All games originally read.
+
+          'n   The games previously marked with a k command with the
+               same n.
+
+          []
+
+          [number]
+               All games in * that contain the positions that can be
+               reached in the specified number of plies from the cur-
+               rent position.  A missing number is the same as zero,
+               meaning just the current position.  Positions are
+               matched with black/white transpositions.
+
+          /regular expression/fields
+               This pattern matches the regular expression against the
+               various text windows.  Fields is a list of characters
+               from the set abdefoprw.  A is for all, b for black, d
+               for date, e for event, f for file, o for opening, p for
+               person (white and black), r for result, and w for
+               white.  If multiple fields are given, the expression is
+               matched on the union of the specified fields.  If no
+               field is given, p is assumed.
+
+          !pattern
+               The set subtraction of * and the given pattern.
+
+          pattern-pattern
+               The set subtraction of the given patterns.
+
+          pattern+pattern
+
+          pattern|pattern
+               The set union of the given patterns.
+
+          pattern pattern
+
+          pattern&pattern
+               The set intersection of the given patterns.
+
+          +pattern
+
+          -pattern
+
+          &pattern
+
+          |pattern
+               These patterns have the current set of games as an
+               implied first operand.
+
+     EXAMPLE
+          Select games that Botvinnik lost:
+
+               (/Botv/w/0-1/r)|(/Botv/b/1-0/r)
+
+     FILES
+          /lib/chess  directory of databases.
+
+     SOURCE
+          /sys/src/cmd/chdb
+
+     SEE ALSO
+          regexp(6).
+
+     BUGS
+          The browser is only a prototype.
+
+          Most of the databases are protected by copyright and not
+          distributed.
