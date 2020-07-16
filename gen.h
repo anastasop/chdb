@@ -2,7 +2,7 @@
 #define	MAXMV	500
 #endif
 #ifndef	MAXMG
-#define	MAXMG	100
+#define	MAXMG	150
 #endif
 
 enum
@@ -112,7 +112,7 @@ extern	void	bremove(void);
 extern	int	wattack(int);
 
 extern	void	chessinit(int, int, int);
-extern	int	chessfmt(void*, int, int, int, int);
+extern	int	chessfmt(void*, Fconv*);
 extern	int	chessin(char*);
 extern	int	xalgin(short*, char*);
 extern	int	xdscin(short*, char*);

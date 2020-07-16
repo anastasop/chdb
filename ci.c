@@ -17,13 +17,12 @@ chessinit(int chr, int mode, int fmt)
 }
 
 int
-chessfmt(void *o, int f1, int f2, int f3, int chr)
+chessfmt(void *o, Fconv *fp)
 {
 	char str1[50], str2[50], *p1, *p2;
 	Rune r;
 	int c;
 
-	USED(chr);
 	((fmtformat&1)? dscout: algout)(*(int*)o, str1, fmtmode);
 	if(fmtformat&2) {
 		p2 = str2;
@@ -82,10 +81,10 @@ chessfmt(void *o, int f1, int f2, int f3, int chr)
 			break;
 		}
 		*p2 = 0;
-		strconv(str2, f1, f2, f3);
+		strconv(str2, fp);
 		return sizeof(int);
 	}
-	strconv(str1, f1, f2, f3);
+	strconv(str1, fp);
 	return sizeof(int);
 }
 
@@ -105,22 +104,19 @@ chessin(char *str)
 int
 xalgin(short *mv, char *str)
 {
-	int p, t, fx, fy, tx, ty, x, m, i, c;
-	char *s, *sstr;
+	int p, t, fx, fy, tx, ty, x, m, i;
+	Rune c;
 
-	sstr = str;
-
-	str = sstr;
-	c = *str++;
+	str += chartorune(&c, str);
 	t = -1;
 	p = -1;
 
 	if(c == '*' && str[0] == '*' && str[1] == '*' && str[2] == 0)
 		return TNULL << 12;
 	for(i=0; c=='o'||c=='O'||c=='0'; i++) {
-		c = *str++;
+		str += chartorune(&c, str);
 		while(c == '-')
-			c = *str++;
+			str += chartorune(&c, str);
 		if(i > 0) {
 			p = WKING;
 			t = TOO;
@@ -128,13 +124,43 @@ xalgin(short *mv, char *str)
 				t = TOOO;
 		}
 	}
-	s = "P1N2n2B3p3R4r4Q5q5K6k6";
-	for(; s[0]; s+=2)
-		if(c == s[0]) {
-			p = s[1] - '0';
-			c = *str++;
-			break;
-		}
+
+	i = 0;
+	switch(c) {
+	case 'P':
+	case L'♙':
+		i = 1;
+		break;
+	case 'N':
+	case 'n':
+	case L'♘':
+		i = 2;
+		break;
+	case 'B':
+	case 'p':
+	case L'♗':
+		i = 3;
+		break;
+	case 'R':
+	case 'r':
+	case L'♖':
+		i = 4;
+		break;
+	case 'Q':
+	case 'q':
+	case L'♕':
+		i = 5;
+		break;
+	case 'K':
+	case 'k':
+	case L'♔':
+		i = 6;
+		break;
+	}
+	if(i != 0) {
+		str += chartorune(&c, str);
+		p = i;
+	}
 
 	fx = -1;
 	fy = -1;
@@ -144,15 +170,14 @@ loop:
 	ty = -1;
 	if(c >= 'a' && c <= 'h') {
 		tx = c-'a';
-		c = *str++;
+		str += chartorune(&c, str);
 	}
 	if(c >= '1' && c <= '8') {
 		ty = '8'-c;
-		c = *str++;
+		str += chartorune(&c, str);
 	}
-/* should  really distinguish : form - */
-	if(c == ':')
-		c = *str++;
+	if(c == ':' || c == L'×')
+		str += chartorune(&c, str);
 	if((c >= 'a' && c <= 'h') ||
 	  (c >= '1' && c <= '8')) {
 		fx = tx;
@@ -160,18 +185,40 @@ loop:
 		goto loop;
 	}
 	if(c == '(' || c == '=')
-		c = *str++;
-	s = "N0n0B1b1p1R2r2Q3q3";
-	for(; s[0]; s+=2)
-		if(c == s[0]) {
-			t = TNPRO + s[1]-'0';
-			c = *str++;
-			break;
-		}
+		str += chartorune(&c, str);
+
+	i = 0;
+	switch(c) {
+	case 'N':
+	case 'n':
+	case L'♘':
+		i = TNPRO;
+		break;
+	case 'B':
+	case 'p':
+	case L'♗':
+		i = TBPRO;
+		break;
+	case 'R':
+	case 'r':
+	case L'♖':
+		i = TRPRO;
+		break;
+	case 'Q':
+	case 'q':
+	case L'♕':
+		i = TQPRO;
+		break;
+	}
+	if(i != 0) {
+		str += chartorune(&c, str);
+		t = i;
+	}
+
 	if(c == ')')
-		c = *str++;
+		str += chartorune(&c, str);
 	while(c == '+')
-		c = *str++;
+		str += chartorune(&c, str);
 	if(c != 0)
 		return 0;
 
