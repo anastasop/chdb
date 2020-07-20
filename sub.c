@@ -482,7 +482,7 @@ posxorb(void)
 	xa = 0;
 	xb = 0;
 	for(i=0; i<64; i++) {
-		j = xpc[board[i]];
+		j = xpc[(int)board[i]];
 		j = (j<<6) | xbd[i];
 		xa ^= xora[j];
 		xb ^= xorb[j];
@@ -527,8 +527,10 @@ xoradd(Xor *xp, int d)
 }
 
 int
-xcmp(ulong *a, ulong *b)
+xcmp(const void *va, const void *vb)
 {
+	ulong *a = (ulong*)va;
+	ulong *b = (ulong*)vb;
 
 	if(*a > *b)
 		return 1;
@@ -543,9 +545,12 @@ xcmp(ulong *a, ulong *b)
 }
 
 int
-ycmp(ulong *a, ulong *b)
+ycmp(const void *va, const void *vb)
 {
 	ushort* g1, *g2;
+
+	ulong *a = (ulong*)va;
+	ulong *b = (ulong*)vb;
 
 	if(*a > *b)
 		return 1;
