@@ -208,9 +208,13 @@ funhd(long n)
 }
 
 int
-sortorder(Str *a, Str *b)
+sortorder(const void *va, const void *vb)
 {
 	char *p1, *p2;
+	Str *a, *b;
+
+	a = (Str*)va;
+	b = (Str*)vb;
 
 	p1 = (char*)a->gp;
 	p2 = (char*)b->gp;
@@ -220,10 +224,14 @@ sortorder(Str *a, Str *b)
 }
 
 int
-sortfile(Str *a, Str *b)
+sortfile(const void *va, const void *vb)
 {
 	int n;
 	char *p1, *p2;
+	Str *a, *b;
+
+	a = (Str*)va;
+	b = (Str*)vb;
 
 	p1 = (char*)a->gp;
 	p2 = (char*)b->gp;
@@ -244,10 +252,14 @@ sortfile(Str *a, Str *b)
 }
 
 int
-sortwhite(Str *a, Str *b)
+sortwhite(const void *va, const void *vb)
 {
 	int n;
 	char *p1, *p2;
+	Str *a, *b;
+
+	a = (Str*)va;
+	b = (Str*)vb;
 
 	p1 = (char*)a->gp;
 	p2 = (char*)b->gp;
@@ -265,10 +277,14 @@ sortwhite(Str *a, Str *b)
 }
 
 int
-sortblack(Str *a, Str *b)
+sortblack(const void *va, const void *vb)
 {
 	int n;
 	char *p1, *p2;
+	Str *a, *b;
+
+	a = (Str*)va;
+	b = (Str*)vb;
 
 	p1 = (char*)a->gp;
 	p2 = (char*)b->gp;
@@ -286,10 +302,14 @@ sortblack(Str *a, Str *b)
 }
 
 int
-sortopening(Str *a, Str *b)
+sortopening(const void *va, const void *vb)
 {
 	int n;
 	char *p1, *p2;
+	Str *a, *b;
+
+	a = (Str*)va;
+	b = (Str*)vb;
 
 	p1 = (char*)a->gp;
 	p2 = (char*)b->gp;
@@ -310,10 +330,14 @@ sortopening(Str *a, Str *b)
 }
 
 int
-sortevent(Str *a, Str *b)
+sortevent(const void *va, const void *vb)
 {
 	int n;
 	char *p1, *p2;
+	Str *a, *b;
+
+	a = (Str*)va;
+	b = (Str*)vb;
 
 	p1 = (char*)a->gp;
 	p2 = (char*)b->gp;
@@ -331,10 +355,14 @@ sortevent(Str *a, Str *b)
 }
 
 int
-sortdate(Str *a, Str *b)
+sortdate(const void *va, const void *vb)
 {
 	int n;
 	char *p1, *p2;
+	Str *a, *b;
+
+	a = (Str*)va;
+	b = (Str*)vb;
 
 	p1 = (char*)a->gp;
 	p2 = (char*)b->gp;
@@ -526,7 +554,6 @@ setposn(int pn)
 	}
 	doutline(d.board);
 
-out:
 	setscroll(0);
 }
 
@@ -833,7 +860,6 @@ setscroll(int vert)
 	if(vert)
 		goto dovert;
 
-dohoriz:
 	s = d.hbar;
 	draw(screen, s, display->black, nil, Pt(0, 0));
 	pos1 = curgame.position;
@@ -905,7 +931,6 @@ scroll(Box *bar, int but, long tot, void (*fun)(long), int vert)
 	if(vert)
 		goto dovert;
 
-dohoriz:
 	y = bar->min.y + BAR/2;
 	do {
 		in = abs(ev.mouse.xy.y-y) <= BAR/2;
@@ -976,7 +1001,7 @@ sortit(int think)
 		(sortby==Byevent)? sortevent:
 		(sortby==Byopening)? sortopening:
 		(sortby==Bydate)? sortdate:
-			0);
+			sortorder);
 	forcegame(1);
 	if(think)
 		esetcursor(0);
@@ -1027,9 +1052,13 @@ light(int loc)
 }
 
 int
-mvcmp(short *a, short *b)
+mvcmp(const void *va, const void *vb)
 {
 	int f1, f2;
+	short *a, *b;
+
+	a = (short*)va;
+	b = (short*)vb;
 
 	f1 = FROM(*a);
 	f2 = FROM(*b);
