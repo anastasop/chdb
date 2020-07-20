@@ -82,6 +82,7 @@ loop:
 void
 yyerror(char *fmt, ...)
 {
+	va_list v;
 	char *p1, *p2;
 
 	if(yysyntax)
@@ -93,6 +94,8 @@ yyerror(char *fmt, ...)
 	memmove(p1+1, p1, p2-p1);
 	*p1 = '\\';
 	prline(7);
-	doprint(chars, chars+sizeof(chars), fmt, &fmt+1);
+
+	va_start(v, fmt);
+	vsnprint(chars, sizeof(chars), fmt, v);
 	prline(8);
 }
