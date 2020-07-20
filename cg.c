@@ -221,7 +221,7 @@ wgen(void)
 	case WPAWN:
 		d = dir[i];
 		if((d&ULEFT) == 0) {
-			if(color[board[i-9]] < 0)
+			if(color[(int)board[i-9]] < 0)
 			if((d&RANK7) != 0) {
 				wcheck(i, i-9, TNPRO);
 				wcheck(i, i-9, TBPRO);
@@ -233,7 +233,7 @@ wgen(void)
 				wcheck(i, i-9, TENPAS);
 		}
 		if((d&URIGHT) == 0) {
-			if(color[board[i-7]] < 0)
+			if(color[(int)board[i-7]] < 0)
 			if((d&RANK7) != 0) {
 				wcheck(i, i-7, TNPRO);
 				wcheck(i, i-7, TBPRO);
@@ -498,7 +498,7 @@ bgen(void)
 	case BPAWN:
 		d = dir[i];
 		if((d&DLEFT) == 0) {
-			if(color[board[i+7]] > 0)
+			if(color[(int)board[i+7]] > 0)
 			if((d&RANK2) != 0) {
 				bcheck(i, i+7, TNPRO);
 				bcheck(i, i+7, TBPRO);
@@ -510,7 +510,7 @@ bgen(void)
 				bcheck(i, i+7, TENPAS);
 		}
 		if((d&DRIGHT) == 0) {
-			if(color[board[i+9]] > 0)
+			if(color[(int)board[i+9]] > 0)
 			if((d&RANK2) != 0) {
 				bcheck(i, i+9, TNPRO);
 				bcheck(i, i+9, TBPRO);
@@ -695,6 +695,7 @@ bremove(void)
 		eppos = (amp[-1]>>5) & 077;
 }
 
+int
 wattack(int pos)
 {
 	schar *p;
