@@ -16,7 +16,6 @@
 #include	"gen.h"
 
 #define	STRSIZE	200
-#define	offsetof(t,x)	((ulong)&((t*)0)->x)
 
 char	openfile[]	= "/lib/chess/opening.m.out";
 
@@ -82,7 +81,7 @@ int	getstr(char*);
 void	initopen(void);
 void	install(char*);
 int	istr(char*);
-int	ocmp(Open*, Open*);
+int	ocmp(const void*, const void*);
 void	putshort(int);
 void	putstr(char*);
 int	rline(void);
@@ -390,7 +389,6 @@ nodate:
 
 	ngames++;
 
-out:
 	memset(&strings, 0, sizeof(strings));
 	ginit(&initp);
 	whposxa = initpxora;
@@ -603,8 +601,11 @@ xormove(int mov)
 }
 
 int
-ocmp(Open *a, Open *b)
+ocmp(const void *va, const void *vb)
 {
+	Open *a = (Open*)va;
+	Open *b = (Open*)vb;
+
 	if(a->xa > b->xa)
 		return 1;
 	if(a->xa < b->xa)
