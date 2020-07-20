@@ -51,7 +51,6 @@ enum
 	Nall,
 };
 
-#define	offsetof(t,x)	((ulong)&((t*)0)->x)
 #define	FROM(x)		(((x)>>6)&077)
 #define	TO(x)		(((x)>>0)&077)
 
@@ -162,13 +161,13 @@ int	hdrsize;
 char	lastbd[64];
 char	mklist[8];
 Menu	men3;
-char*	men3l[];
+extern char*	men3l[];
 long	ngames;
 Node	nodes[NODESIZE];
 int	nodi;
 int	numcmp(char*, char*);
 int	ogameno;
-short*	piece[];
+extern short*	piece[];
 int	pipefid[2];
 int	printcol;
 int	sortby;
@@ -201,7 +200,7 @@ void	dodupl(void);
 void	doutline(Box);
 void	dowrite(int, char*);
 Image*	drawpiece(short*, int);
-void	forcegame(int);
+void	forcegame(long);
 void	freenodes(void);
 void	funh(long);
 void	funhd(long);
