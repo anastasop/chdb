@@ -13,7 +13,7 @@
 #include	<ctype.h>
 #include	<bio.h>
 #include	<ar.h>
-#include	"../gen.h"
+#include	"gen.h"
 
 #define	STRSIZE	200
 #define	offsetof(t,x)	((ulong)&((t*)0)->x)

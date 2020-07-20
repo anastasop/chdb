@@ -1,0 +1,4 @@
+*.o
+y.tab.[ch]
+o.cdb
+o.ddb

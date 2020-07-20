@@ -1,7 +1,8 @@
-</$objtype/mkfile
+<$PLAN9/src/mkhdr
 
-TARG=chdb
-OFILES=\
+TARG=ddb cdb
+
+DDB=\
 	y.tab.$O\
 	lex.$O\
 	ddb.$O\
@@ -12,12 +13,18 @@ OFILES=\
 	draw.$O\
 	data.$O\
 
-HFILES=\
-	ddb.h\
-	gen.h\
-	y.tab.h\
+CDB=\
+	cdb.$O\
+	ci.$O\
+	cg.$O\
+	cd.$O\
 
 YFILES= cmd.y
 
-BIN=/$objtype/bin
-</sys/src/cmd/mkone
+$DDB:	ddb.h gen.h y.tab.h
+$CDB:	gen.h
+
+$O.ddb:	$DDB
+$O.cdb:	$CDB
+
+<$PLAN9/src/mkmany
