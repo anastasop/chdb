@@ -13,11 +13,11 @@ struct
 void	doline(char*, int, int, int, int);
 void	doflood(char*);
 void	dofill(char*, int, int);
-Bitmap*	dobitmap(char*, char*);
+Image*	doimage(char*, char*);
 void	dopict(char*);
 
-Bitmap*
-draw(short *vec, int side)
+Image*
+drawpiece(short *vec, int side)
 {
 	int i, j;
 	int x1, x2, y1, y2;
@@ -83,7 +83,7 @@ draw(short *vec, int side)
 		}
 	}
 	
-	return dobitmap(w.sq1, w.sq2);
+	return doimage(w.sq1, w.sq2);
 }
 
 void
@@ -245,10 +245,10 @@ dopict(char *sq)
 	print("\n");
 }
 
-Bitmap*
-dobitmap(char *p, char *t)
+Image*
+doimage(char *p, char *t)
 {
-	Bitmap *b;
+	Image *b;
 	Rectangle r;
 	char *q;
 	int i, j, b1, b0;
@@ -257,9 +257,9 @@ dobitmap(char *p, char *t)
 	r.min.y = 0;
 	r.max.x = w.side;
 	r.max.y = w.side;
-	b = balloc(r, 0);
+	b = allocimage(display, r, strtochan("k1"), 0, DNofill);
 	if(b == 0) {
-		fprint(2, "balloc failed\n");
+		fprint(2, "allocimage failed\n");
 		exits("balloc");
 	}
 
@@ -272,15 +272,15 @@ dobitmap(char *p, char *t)
 				b0 |= b1;
 			b1 >>= 1;
 			if(b1 == 0) {
-				*q++ = b0;
+				*q++ = ~b0;
 				b0 = 0;
 				b1 = 1<<7;
 			}
 			p++;
 		}
 		if(b1 != (1<<7))
-			*q++ = b0;
+			*q++ = ~b0;
 	}
-	wrbitmap(b, 0, w.side, (uchar*)t);
+	loadimage(b, r, (uchar*)t, q - t);
 	return b;
 }

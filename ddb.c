@@ -56,7 +56,9 @@ main(int argc, char *argv[])
 	/*
 	 * initialize event stuff
 	 */
-	binit(0, 0, "ddb");
+	if (initdraw(0, "/lib/font/bit/lucsans/euro.8.font", "ddb") < 0) {
+		sysfatal("initdraw failed: %r");
+	}
 	einit(Emouse|Ekeyboard);
 
 	cinitf1 = 0;	/* minimal expansion */
@@ -70,7 +72,7 @@ main(int argc, char *argv[])
 
 	gameno = 0;
 
-	ereshaped(D->r);
+	eresized(1);
 	sortit(1);
 
 	cmdi = 0;
@@ -119,7 +121,7 @@ main(int argc, char *argv[])
 					if(i < 0)
 						setgame(ogameno);
 				} else {
-					i = menuhit(3, &ev.mouse, &men3);
+					i = emenuhit(3, &ev.mouse, &men3);
 					if(i >= 0) {
 						sortby = i;
 						sortit(1);
@@ -143,18 +145,18 @@ main(int argc, char *argv[])
 				prline(7);
 				cmdi = 0;
 				nodi = 0;
-				cursorswitch(&thinking);
+				esetcursor(&thinking);
 				yysyntax = 0;
 				yyterminal = 0;
 				yystring = 0;
 				yyparse();
 				freenodes();
-				cursorswitch(0);
+				esetcursor(0);
 				cmdi = 0;
 				continue;
 
 			case 0x4:
-				bitblt(D, d.screen.min, D, d.screen, 0);
+				draw(screen, screen->r, display->white, nil, Pt(0, 0));
 				exits(0);
 
 			case '\b':
@@ -350,14 +352,21 @@ sortdate(Str *a, Str *b)
 }
 
 void
-ereshaped(Box r)
+eresized(int new)
 {
 	int i, w, h, oside;
+	Rectangle r;
+
+	if (new && getwindow(display, Refnone) < 0) {
+		sysfatal("attach to window: %r");
+	}
+
+	r = screen->r;
 
 	/*
 	 * build screen layout
 	 */
-	d.screen = inset(r, INSET);
+	d.screen = insetrect(r, INSET);
 	w = (d.screen.max.x - d.screen.min.x) -
 		(BAR+INSET) - (0);
 	h = (d.screen.max.y - d.screen.min.y) -
@@ -406,10 +415,10 @@ ereshaped(Box r)
 	if(oside != d.side)
 	for(i=0; piece[i]; i++) {
 		if(bitpiece[i])
-			bfree(bitpiece[i]);
-		bitpiece[i] = draw(piece[i], d.side);
+			freeimage(bitpiece[i]);
+		bitpiece[i] = drawpiece(piece[i], d.side);
 	}
-	bitblt(D, d.screen.min, D, d.screen, 0);
+	draw(screen, screen->r, display->white, nil, Pt(0, 0));
 
 	doutline(d.header);
 	hdrsize = (d.header.max.x - d.header.min.x) / CHW - 2;
@@ -422,17 +431,17 @@ void
 prline(int line)
 {
 	int l, y;
+	Point p;
 
 	y = d.header.min.y + line*CHT - CHT/2;
 	l = strlen(chars);
 	if(l < hdrsize)
 		memset(chars+l, ' ', hdrsize-l);
-	chars[hdrsize] = 0;
-	string(D,
-		Pt(d.header.min.x + 10, y),
-			font, chars, S);
+	p = Pt(d.header.min.x + 10, y);
+	draw(screen, Rect(p.x, p.y, p.x + hdrsize * CHW, p.y + CHT), display->white, nil, Pt(0, 0));
+	string(screen, p, display->black, Pt(0, 0), font, chars);
 	if(line == 8)
-		bflush();
+		flushimage(display, 1);
 }
 
 void
@@ -487,7 +496,7 @@ setposn(int pn)
 {
 	int i, j, p;
 	Point pt;
-	Bitmap *pc;
+	Image *pc;
 
 	if(pn > curgame.nmoves)
 		pn = curgame.nmoves;
@@ -508,10 +517,10 @@ setposn(int pn)
 				if(p & 010)
 					pc = bitpiece[(p&7) + 0-1];
 			}
-			bitblt(D, pt, pc, pc->r, S);
+			draw(screen, Rpt(pt, addpt(pt, Pt(Dx(pc->r), Dy(pc->r)))), pc, nil, Pt(0, 0));
 			if((i^j) & 1) {			/* black square shading */
 				pc = bitpiece[(p&7) + 14-1];
-				bitblt(D, pt, pc, pc->r, DorS);
+				drawop(screen, Rpt(pt, addpt(pt, Pt(Dx(pc->r), Dy(pc->r)))), nil, pc, Pt(0, 0), DinS);
 			}
 		}
 	}
@@ -797,14 +806,14 @@ decode(Game *g, Str *s)
 void
 doutline(Box x)
 {
-	segment(D, Pt(x.min.x, x.min.y),
-		Pt(x.max.x, x.min.y), ~0, DorS);
-	segment(D, Pt(x.max.x, x.min.y),
-		Pt(x.max.x, x.max.y), ~0, DorS);
-	segment(D, Pt(x.max.x, x.max.y),
-		Pt(x.min.x, x.max.y), ~0, DorS);
-	segment(D, Pt(x.min.x, x.max.y),
-		Pt(x.min.x, x.min.y), ~0, DorS);
+	line(screen, Pt(x.min.x, x.min.y),
+		Pt(x.max.x, x.min.y), 0, 0, 1, display->black, Pt(0, 0));
+	line(screen, Pt(x.max.x, x.min.y),
+		Pt(x.max.x, x.max.y), 0, 0, 1, display->black, Pt(0, 0));
+	line(screen, Pt(x.max.x, x.max.y),
+		Pt(x.min.x, x.max.y), 0, 0, 1, display->black, Pt(0, 0));
+	line(screen, Pt(x.min.x, x.max.y),
+		Pt(x.min.x, x.min.y), 0, 0, 1, display->black, Pt(0, 0));
 }
 
 int
@@ -826,7 +835,7 @@ setscroll(int vert)
 
 dohoriz:
 	s = d.hbar;
-	bitblt(D, s.min, D, s, 0xf);
+	draw(screen, s, display->black, nil, Pt(0, 0));
 	pos1 = curgame.position;
 	pos2 = pos1 + 1;
 	tot = curgame.nmoves+1-1 + 1;
@@ -853,7 +862,7 @@ dohoriz:
 
 dovert:
 	s = d.vbar;
-	bitblt(D, s.min, D, s, 0xf);
+	draw(screen, s, display->black, nil, Pt(0, 0));
 	pos1 = gameno;
 	pos2 = pos1 + SIZEV;
 	tot = ngames-1 + SIZEV;
@@ -879,7 +888,7 @@ dovert:
 	goto out;
 
 out:
-	bitblt(D, s.min, D, s, 0x0);
+	draw(screen, s, display->white, nil, Pt(0, 0));
 }
 
 long
@@ -892,7 +901,7 @@ scroll(Box *bar, int but, long tot, void (*fun)(long), int vert)
 	pos = -1;
 	oxy = -1;
 	opos = -1;
-	s = inset(*bar, 1);
+	s = insetrect(*bar, 1);
 	if(vert)
 		goto dovert;
 
@@ -907,7 +916,7 @@ dohoriz:
 			if(x >= s.max.x)
 				x = s.max.x;
 			if(!eqpt(ev.mouse.xy, Pt(x, y)))
-				cursorset(Pt(x, y));
+				emoveto(Pt(x, y));
 			if(x == oxy)
 				break;
 			oxy = x;
@@ -935,7 +944,7 @@ dovert:
 			if(y >= s.max.y)
 				y = s.max.y;
 			if(!eqpt(ev.mouse.xy, Pt(x, y)))
-				cursorset(Pt(x, y));
+				emoveto(Pt(x, y));
 			if(y == oxy)
 				break;
 			oxy = y;
@@ -958,7 +967,7 @@ sortit(int think)
 {
 
 	if(think)
-		cursorswitch(&thinking);
+		esetcursor(&thinking);
 	qsort(str+1, ngames-1, sizeof(Str),
 		(sortby==Byorder)? sortorder:
 		(sortby==Byfile)? sortfile:
@@ -970,7 +979,7 @@ sortit(int think)
 			0);
 	forcegame(1);
 	if(think)
-		cursorswitch(0);
+		esetcursor(0);
 }
 
 int
@@ -1012,7 +1021,7 @@ light(int loc)
 	r.max.x = r.min.x + d.side - 1;
 	r.max.y = r.min.y + d.side - 1;
 	doutline(r);
-	r = inset(r, 1);
+	r = insetrect(r, 1);
 	doutline(r);
 	lastbd[loc] = -1;
 }

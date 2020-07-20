@@ -5,7 +5,9 @@
 
 #include	<u.h>
 #include	<libc.h>
-#include	<libg.h>
+#include	<draw.h>
+#include	<cursor.h>
+#include	<event.h>
 #include	<ctype.h>
 #include	<bio.h>
 #include	<regexp.h>
@@ -50,7 +52,6 @@ enum
 };
 
 #define	offsetof(t,x)	((ulong)&((t*)0)->x)
-#define	D		(&screen)
 #define	FROM(x)		(((x)>>6)&077)
 #define	TO(x)		(((x)>>0)&077)
 
@@ -146,7 +147,7 @@ struct
 	int	side;
 } d;
 
-Bitmap*	bitpiece[20];
+Image*	bitpiece[20];
 char	chars[STRSIZE];
 char	cmd[CMDSIZE];
 int	cmdi;
@@ -199,7 +200,7 @@ void	decode(Game*, Str*);
 void	dodupl(void);
 void	doutline(Box);
 void	dowrite(int, char*);
-Bitmap*	draw(short*, int);
+Image*	drawpiece(short*, int);
 void	forcegame(int);
 void	freenodes(void);
 void	funh(long);
